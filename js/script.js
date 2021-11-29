@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Timer
 
-    const deadline = '2020-05-11';
+    const deadline = '2022-05-20';
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()),
@@ -192,12 +192,19 @@ window.addEventListener('DOMContentLoaded', function() {
         return await res.json();
     };
 
-    getResource('http://localhost:3000/menu')
-        .then(data => {
-            data.forEach(({img, altimg, title, descr, price}) => {
-                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-            });
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => {
+    //         data.forEach(({img, altimg, title, descr, price}) => {
+    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+    //         });
+    //     });
+
+    axios.get('http://localhost:3000/menu')
+    .then(data => {
+        data.data.forEach(({img, altimg, title, descr, price}) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
         });
+    });
 
     // Forms
 
@@ -280,7 +287,52 @@ window.addEventListener('DOMContentLoaded', function() {
         }, 4000);
     }
 
-    fetch('http://localhost:3000/menu')
-        .then(data => data.json())
-        .then(res => console.log(res));
+    // slider
+
+    const sliders = document.querySelectorAll('.offer__slide'),
+          prev = document.querySelector('.offer__slider-prev'),
+          next = document.querySelector('.offer__slider-next'),
+          total = document.querySelector('#total'),
+          current = document.querySelector('#current');
+    let sliderIndex = 1;
+
+    showSliders(sliderIndex);
+
+    if(sliders.length < 10) {
+        total.textContent = `0${sliders.length}`;
+    } else {
+        total.textContent = sliders.length;
+    }
+
+    function showSliders(n) {
+        if(n > sliders.length) {
+            sliderIndex = 1;
+        }
+
+        if (n<1) {
+            sliderIndex = sliders.length;
+        }
+
+        sliders.forEach(item => item.style.display = 'none');
+
+        sliders[sliderIndex-1].style.display = 'block';
+
+        if(sliders.length < 10) {
+            current.textContent = `0${sliderIndex}`;
+        } else {
+            current.textContent = sliderIndex;
+        }
+    }
+
+    function plusSlides(n) {
+        showSliders(sliderIndex += n);
+    }
+
+    prev.addEventListener('click', () => {
+        plusSlides(-1);
+    });
+
+    next.addEventListener('click', () => {
+        plusSlides(1);
+    });
 });
