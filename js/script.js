@@ -361,44 +361,4 @@ window.addEventListener('DOMContentLoaded', function() {
             current.textContent = sliderIndex;
         }
     });
-
-    // showSliders(sliderIndex);
-
-    // if(sliders.length < 10) {
-    //     total.textContent = `0${sliders.length}`;
-    // } else {
-    //     total.textContent = sliders.length;
-    // }
-
-    // function showSliders(n) {
-    //     if(n > sliders.length) {
-    //         sliderIndex = 1;
-    //     }
-
-    //     if (n<1) {
-    //         sliderIndex = sliders.length;
-    //     }
-
-    //     sliders.forEach(item => item.style.display = 'none');
-
-    //     sliders[sliderIndex-1].style.display = 'block';
-
-    //     if(sliders.length < 10) {
-    //         current.textContent = `0${sliderIndex}`;
-    //     } else {
-    //         current.textContent = sliderIndex;
-    //     }
-    // }
-
-    // function plusSlides(n) {
-    //     showSliders(sliderIndex += n);
-    // }
-
-    // prev.addEventListener('click', () => {
-    //     plusSlides(-1);
-    // });
-
-    // next.addEventListener('click', () => {
-    //     plusSlides(1);
-    // });
 });
