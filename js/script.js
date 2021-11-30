@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Timer
 
-    const deadline = '2022-05-20';
+    const deadline = '2020-05-11';
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()),
@@ -182,29 +182,12 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const getResource = async (url) => {
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json();
-    };
-
-    // getResource('http://localhost:3000/menu')
-    //     .then(data => {
-    //         data.forEach(({img, altimg, title, descr, price}) => {
-    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-    //         });
-    //     });
-
-    axios.get('http://localhost:3000/menu')
-    .then(data => {
-        data.data.forEach(({img, altimg, title, descr, price}) => {
-            new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({img, altimg, title, descr, price}) => {
+                new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+            });
         });
-    });
 
     // Forms
 
@@ -220,16 +203,26 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 
     const postData = async (url, data) => {
-        const res = await fetch(url, {
+        let res = await fetch(url, {
             method: "POST",
             headers: {
-                'Content-type': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body:data
+            body: data
         });
-
+    
         return await res.json();
     };
+
+    async function getResource(url) {
+        let res = await fetch(url);
+    
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+    
+        return await res.json();
+    }
 
     function bindPostData(form) {
         form.addEventListener('submit', (e) => {
@@ -245,10 +238,6 @@ window.addEventListener('DOMContentLoaded', function() {
         
             const formData = new FormData(form);
 
-            // const object = {};
-            // formData.forEach(function(value, key){
-            //     object[key] = value;
-            // });
             const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
             postData('http://localhost:3000/requests', json)
@@ -287,78 +276,126 @@ window.addEventListener('DOMContentLoaded', function() {
         }, 4000);
     }
 
-    // slider
+    // Slider
 
-    const sliders = document.querySelectorAll('.offer__slide'),
-          prev = document.querySelector('.offer__slider-prev'),
-          next = document.querySelector('.offer__slider-next'),
-          total = document.querySelector('#total'),
-          current = document.querySelector('#current'),
-          slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-          slidesField = document.querySelector('.offer__sliders-inner'),
-          width = window.getComputedStyle(slidesWrapper).width;
-    let sliderIndex = 1;
     let offset = 0;
+    let slideIndex = 1;
 
-    if(sliders.length < 10) {
-        total.textContent = `0${sliders.length}`;
-        current.textContent = `0${sliderIndex}`;
+    const slides = document.querySelectorAll('.offer__slide'),
+        slider = document.querySelector('.offer__slider'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        total = document.querySelector('#total'),
+        current = document.querySelector('#current'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        width = window.getComputedStyle(slidesWrapper).width,
+        slidesField = document.querySelector('.offer__slider-inner');
+
+    if (slides.length < 10) {
+        total.textContent = `0${slides.length}`;
+        current.textContent =  `0${slideIndex}`;
     } else {
-        total.textContent = sliders.length;
-        current.textContent = sliderIndex;
+        total.textContent = slides.length;
+        current.textContent =  slideIndex;
     }
 
-    slidesField.style.width = 100 * sliders.length + '%';
+    slidesField.style.width = 100 * slides.length + '%';
     slidesField.style.display = 'flex';
     slidesField.style.transition = '0.5s all';
 
     slidesWrapper.style.overflow = 'hidden';
 
-    sliders.forEach(slide => {
+    slides.forEach(slide => {
         slide.style.width = width;
     });
 
+    slider.style.position = 'relative';
+
+    const indicators = document.createElement('ol'),
+          dots = [];
+
+    indicators.classList.add('carousel-indicators');
+    slider.append(indicators);
+
+    for(let i = 0; i<slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to', i+1);
+        dot.classList.add('dot');
+        if ( i === 0) {
+            dot.style.opacity = 1;
+        }
+        indicators.append(dot);
+        dots.push(dot);
+    }
+
+
     next.addEventListener('click', () => {
-        if (offset == +width.slice(0, width.length-2) * (sliders.length -1)) {
+        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) {
             offset = 0;
         } else {
-            offset += +width.slice(0, width.length-2);
+            offset += +width.slice(0, width.length - 2); 
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
 
-        if (sliderIndex == sliders.length) {
-            sliderIndex = 1;
+        if (slideIndex == slides.length) {
+            slideIndex = 1;
         } else {
-            sliderIndex++;
+            slideIndex++;
         }
 
-        if(sliders.length < 10) {
-            current.textContent = `0${sliderIndex}`;
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
         } else {
-            current.textContent = sliderIndex;
+            current.textContent =  slideIndex;
         }
-    });
+
+        dots.forEach(dot => dot.style.opacity = '0.5');
+        dots[slideIndex - 1].style.opacity = 1;  
+      });
 
     prev.addEventListener('click', () => {
         if (offset == 0) {
-            offset = +width.slice(0, width.length-2) * (sliders.length -1);
+            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
         } else {
-            offset -= +width.slice(0, width.length-2);
+            offset -= +width.slice(0, width.length - 2);
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
 
-        if (sliderIndex == 1) {
-            sliderIndex = sliders.length;
+        if (slideIndex == 1) {
+            slideIndex = slides.length;
         } else {
-            sliderIndex--;
+            slideIndex--;
         }
 
-        if(sliders.length < 10) {
-            current.textContent = `0${sliderIndex}`;
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
         } else {
-            current.textContent = sliderIndex;
+            current.textContent =  slideIndex;
         }
+
+        dots.forEach(dot => dot.style.opacity = '0.5');
+        dots[slideIndex - 1].style.opacity = 1;  
+    });
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
+
+            slideIndex = slideTo;
+            offset = +width.slice(0, width.length - 2) * (slideTo - 1);
+
+            slidesField.style.transform = `translateX(-${offset}px)`;
+
+            if (slides.length < 10) {
+                current.textContent =  `0${slideIndex}`;
+            } else {
+                current.textContent =  slideIndex;
+            }
+
+            dots.forEach(dot => dot.style.opacity = '0.5');
+            dots[slideIndex - 1].style.opacity = 1;  
+        });
     });
 });
